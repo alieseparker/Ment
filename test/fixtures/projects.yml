@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+project_1:
+  id: 1
+  title: MyString
+  body: MyText
+
+project_2:
+  id: 2
+  title: MyString
+  body: MyText
