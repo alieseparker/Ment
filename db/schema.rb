@@ -14,14 +14,19 @@
 ActiveRecord::Schema.define(version: 20141111034639) do
 
   create_table "assignments", force: true do |t|
+    t.integer  "project_id"
+    t.integer  "user_id"
+    t.string   "role"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
+  add_index "assignments", ["project_id"], name: "index_assignments_on_project_id"
+  add_index "assignments", ["user_id"], name: "index_assignments_on_user_id"
+
   create_table "projects", force: true do |t|
     t.string   "title"
     t.text     "body"
-    t.integer  "user_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

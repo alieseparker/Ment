@@ -1,6 +1,6 @@
 class ProjectsController < ApplicationController
   before_action :set_project, only: [:show, :edit, :update, :destroy]
-
+  before_action :authenticate_user!, except: [:index, :show]
   # GET /projects
   # GET /projects.json
   def index
@@ -10,11 +10,13 @@ class ProjectsController < ApplicationController
   # GET /projects/1
   # GET /projects/1.json
   def show
+    @creator = @project.creator
+    @participants = @project.participants
   end
 
   # GET /projects/new
   def new
-    @project = Project.new
+    @project = current_user.projects.build
   end
 
   # GET /projects/1/edit
@@ -24,30 +26,24 @@ class ProjectsController < ApplicationController
   # POST /projects
   # POST /projects.json
   def create
-    @project = Project.new(project_params)
-
-    respond_to do |format|
-      if @project.save
-        format.html { redirect_to @project, notice: 'Project was successfully created.' }
-        format.json { render :show, status: :created, location: @project }
-      else
-        format.html { render :new }
-        format.json { render json: @project.errors, status: :unprocessable_entity }
-      end
+    @project = current_user.projects.build(project_params)
+    current_user.projects << @project
+    current_user.projects.last.assignments.where(
+      user_id: current_user.id)[0].update(role: 'creator')
+    if @project.save
+      redirect_to @project, notice: 'Project was successfully created.'
+    else
+      render :new
     end
   end
 
   # PATCH/PUT /projects/1
   # PATCH/PUT /projects/1.json
   def update
-    respond_to do |format|
-      if @project.update(project_params)
-        format.html { redirect_to @project, notice: 'Project was successfully updated.' }
-        format.json { render :show, status: :ok, location: @project }
-      else
-        format.html { render :edit }
-        format.json { render json: @project.errors, status: :unprocessable_entity }
-      end
+    if @project.update(project_params)
+      redirect_to @project, notice: 'Project was successfully updated.'
+    else
+      render :edit
     end
   end
 
@@ -55,10 +51,14 @@ class ProjectsController < ApplicationController
   # DELETE /projects/1.json
   def destroy
     @project.destroy
-    respond_to do |format|
-      format.html { redirect_to projects_url, notice: 'Project was successfully destroyed.' }
-      format.json { head :no_content }
-    end
+    redirect_to projects_url, notice: 'Project was successfully destroyed.'
+  end
+
+  def join_project
+    current_user.projects << @project
+    current_user.projects.find(@project).assignments.where(
+      user_id: current_user.id)[1].update(role: 'participant')
+    redirect_to @project
   end
 
   private
@@ -69,6 +69,6 @@ class ProjectsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def project_params
-      params.require(:project).permit(:title, :body, :user_id)
+      params.require(:project).permit(:title, :body)
     end
 end

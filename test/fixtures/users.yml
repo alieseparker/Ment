@@ -4,8 +4,12 @@
 # model remove the '{}' from the fixture names and add the columns immediately
 # below each fixture, per the syntax in the comments below
 #
-one: {}
-# column: value
-#
-two: {}
-#  column: value
+Peach:
+  id: 1
+  email: peach@email.com
+  encrypted_password: <%= User.new.send(:password_digest, "password") %>
+
+Daisy:
+  id: 2
+  email: daisy@email.com
+  encrypted_password: <%= User.new.send(:password_digest, "password") %>
